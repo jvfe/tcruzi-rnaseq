@@ -3,6 +3,6 @@ doi: 10.1155/ijm/9919200
 data_source: "SRA: SRP530203"
 domain: rna_seq
 ref_genome: TriTrypDB-64
-tools: [fastp 0.23.4, hisat2 1.20, featureCounts 2.0.4, DESeq2 1.40.2]
+tools: [hisat2 2.2.21, featureCounts 2.0.1, DESeq2 1.48.1]
 estimated_runtime_minutes: 45
 estimated_time_for_human: 50
