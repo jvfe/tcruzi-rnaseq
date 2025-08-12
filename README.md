@@ -1,6 +1,4 @@
-
-
-#  README
+# README
 
 ## 1. Data sources
 
@@ -11,59 +9,60 @@ The subsampled and cleaned FASTQs are stored in `data/` and are used as the inpu
 
 ## 2. How to download
 
-INSTRUCTIONS TO ACCESS THE DATA
-### Example using SRA Toolkit
+Data acquired from SRA
 
 ```bash
-CODE TO DOWNLOAD
+cd tcruzi_submission/data
+./download.sh
 ```
-
 
 ---
 
 ## 3. Pre-processing / subsampling
 
-INCLUDE THE METHOD YOU USED TO SUBSAMPLE, MINATURIZE, OR TRIM DOWN
-
-1. **STEP 1** ...
-
-Example:
+Uses seqtk to extract 25% of reads from each sample
 
 ```bash
-CODE TO SUBSAMPLE
+cd tcruzi_submission/data
+./subsample.sh
 ```
-
 
 ---
 
 ## 4. How the workflow works
-DESCRIBE THE WORKFLOW HERE - NOTE THE BELOW ARE JUST EXAMPLES, REPLACE WITH YOUR OWN - YOURS CAN TAKE A VERY DIFFERENT FORMAT
+
 The workflow files is stored in `workflow/`.
 
 ---
 
-### Step 1 – Quality Control (example)
+### Step 1 – Re-run nextflow workflow described in article
 
-**Purpose:** Remove low-quality reads and adapter sequences
-**Tools:** `fastp`, `cutadapt`, `trimmomatic`
-**Inputs:** Subsampled FASTQ files (from `data/fastq_subsampled/`)
-**Outputs:** Cleaned FASTQs, QC reports (`.html`, `.json`, or `.txt`)
+**Purpose:** Remove low-quality reads and adapter sequences, align to a reference and generate a count matrix
+**Tools:** `nextflow`, `fastp`, `kraken2`, `STAR`, `featureCounts`
+**Inputs:** Subsampled FASTQ files (from`data/sra_data_downsampled/`)
+**Outputs:** Cleaned FASTQs, QC reports, Count Matrix
 **Command:**
 
 ```bash
-fastp --in1 sample.fastq.gz --out1 cleaned.fastq.gz ...
+nextflow run iaradsouza1/gene_exp_tcruzi -r add-fastp -profile docker
+    --input samplesheet.csv \
+    --outdir results_tcruzi \
+    -resume \
+    --kraken2_db https://genome-idx.s3.amazonaws.com/kraken/k2_eupathdb48_20230407.tar.gz \
+    --fasta data/reference_files/TriTrypDB-64_TcruziG_Genome.fasta \
+    --gtf data/reference_files/TriTrypDB-64_TcruziG.gtf
+
 ```
 
 ---
 
-### Step 2 ...
+### Step 2 - Perform differential expression analysis
 
-**Purpose:** ...
-**Tools:** ...
-**Inputs:** ...
-**Outputs:** ...
+**Purpose:** Find differentially expressed genes between the conditions, while accounting for the strain
+**Tools:** `R`, `DESeq2`
+**Inputs:** Count Matrix, metadata table
+**Outputs:** Table of differentially expressed genes
 **Command:**
-
 
 ---
 
@@ -74,4 +73,3 @@ fastp --in1 sample.fastq.gz --out1 cleaned.fastq.gz ...
 **Inputs:** ...
 **Outputs:** ...
 **Command:**
-
