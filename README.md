@@ -2,7 +2,7 @@
 
 ## 1. Data sources
 
-This task is based on publicly available sequencing data from a study of **\[insert study topic here]**. The dataset includes multiple samples under different conditions (e.g., treated vs. control) and was originally sequenced using **\[insert platform, e.g., Illumina 2×150]**.
+This task is based on publicly available sequencing data from study **\[P21 Ablation Unveils Strain-Specific Transcriptional Reprogramming in Trypanosoma cruzi Amastigotes]**. The dataset includes multiple samples under different conditions (e.g., treated vs. control) and was originally sequenced using **\[Illumina HiSeq2500]**.
 The subsampled and cleaned FASTQs are stored in `data/` and are used as the inputs for the workflow.
 
 ---
@@ -20,10 +20,16 @@ cd tcruzi_submission/data
 
 ## 3. Pre-processing / subsampling
 
-Uses seqtk to extract 25% of reads from each sample
+Uses a version of the analysis workflow to extract only protozoa reads (encompassing T. cruzi)
 
 ```bash
 cd tcruzi_submission/data
+./subsample_kraken.sh
+```
+
+Then filter down to only 25% of reads
+
+```bash
 ./subsample.sh
 ```
 
@@ -38,20 +44,13 @@ The workflow files is stored in `workflow/`.
 ### Step 1 – Re-run nextflow workflow described in article
 
 **Purpose:** Remove low-quality reads and adapter sequences, align to a reference and generate a count matrix
-**Tools:** `nextflow`, `fastp`, `kraken2`, `STAR`, `featureCounts`
+**Tools:** `nextflow`, `fastp`, `STAR`, `featureCounts`
 **Inputs:** Subsampled FASTQ files (from`data/sra_data_downsampled/`)
 **Outputs:** Cleaned FASTQs, QC reports, Count Matrix
 **Command:**
 
 ```bash
-nextflow run iaradsouza1/gene_exp_tcruzi -r add-fastp -profile docker
-    --input samplesheet.csv \
-    --outdir results_tcruzi \
-    -resume \
-    --kraken2_db https://genome-idx.s3.amazonaws.com/kraken/k2_eupathdb48_20230407.tar.gz \
-    --fasta data/reference_files/TriTrypDB-64_TcruziG_Genome.fasta \
-    --gtf data/reference_files/TriTrypDB-64_TcruziG.gtf
-
+bash workflow/run_pipeline.sh
 ```
 
 ---
