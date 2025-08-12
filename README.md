@@ -44,7 +44,7 @@ The workflow files is stored in `workflow/`.
 ### Step 1 – Re-run nextflow workflow described in article
 
 **Purpose:** Remove low-quality reads and adapter sequences, align to a reference and generate a count matrix
-**Tools:** `nextflow`, `fastp`, `STAR`, `featureCounts`
+**Tools:** `nextflow`, `fastp`, `hisat2`, `featureCounts`
 **Inputs:** Subsampled FASTQ files (from`data/sra_data_downsampled/`)
 **Outputs:** Cleaned FASTQs, QC reports, Count Matrix
 **Command:**
@@ -63,12 +63,6 @@ bash workflow/run_pipeline.sh
 **Outputs:** Table of differentially expressed genes
 **Command:**
 
----
-
-### Step X – Analysis (e.g., DESeq2, variant calling, etc.)
-
-**Purpose:** ...
-**Tools:** ...
-**Inputs:** ...
-**Outputs:** ...
-**Command:**
+```bash
+quarto render workflow/run_dge.qmd
+```

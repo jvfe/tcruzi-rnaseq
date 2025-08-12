@@ -7,41 +7,15 @@ format: html
 # Load necessary libraries
 library(DESeq2)
 library(ggplot2)
-library(GOstats)
 
-# --- 1. Load Data ---
-# Load the featureCounts output table from the Nextflow results
-# The exact path might vary, check the pipeline's output directory structure.
-count_data <- read.table("data/merged_gene_counts.txt", header = TRUE, row.names = 1)
+count_data <- readRDS("results_tcruzi/gather/count_table_hisat2.rds")
 
-# Load metadata (you need to create this file based on SRA info)
-# The metadata links each sample to its experimental variables.
-# Example 'metadata.csv':
-# sample,strain,condition
-# SRR30522307,G,TcP21-/-
-# SRR30522308,G,Cas9
-# SRR30522309,Y,TcP21-/-
-# SRR30522310,Y,Cas9
 col_data <- read.csv("data/metadata.csv", row.names = 1)
 
-# Ensure column names of counts match row names of metadata
 colnames(count_data) <- rownames(col_data)
 
-# --- 2. PCA Plot ---
-# Perform a variance stabilizing transformation for visualization
-vsd <- vst(as.matrix(count_data), blind = FALSE)
-pca_data <- plotPCA(vsd, intgroup = c("strain", "condition"), returnData = TRUE)
-percentVar <- round(100 * attr(pca_data, "percentVar"))
+rownames(count_data)[which.max(rowSums(count_data))] # q3
 
-ggplot(pca_data, aes(x = PC1, y = PC2, color = strain, shape = condition)) +
-  geom_point(size = 3) +
-  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
-  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
-  coord_fixed() +
-  ggtitle("PCA of Gene Expression")
-
-# --- 3. Differential Expression Analysis with DESeq2 ---
-# Create DESeqDataSet object
 # The design ~ strain + condition models the effect of 'condition' while accounting for baseline differences between strains.
 dds <- DESeqDataSetFromMatrix(countData = count_data,
                               colData = col_data,
@@ -51,36 +25,14 @@ dds <- DESeqDataSetFromMatrix(countData = count_data,
 dds <- DESeq(dds)
 
 # Get the results for the condition comparison (TcP21-/- vs Cas9)
-res <- results(dds, name="condition_TcP21...._vs_Cas9") # Adjust name based on your levels
+res <- results(dds, name="condition_TcP21_vs_Cas9", tidy = T)
 summary(res)
 
-# Filter for significantly differentially expressed genes (FDR < 0.001)
-sig_genes <- res[which(res$padj < 0.001), ]
-head(sig_genes)
+res <- res[complete.cases(res),]
+sig_gene <- res[res$pvalue < 0.01, ]
+nrow(sig_gene) # q5
 
-# --- 4. Functional GO Enrichment Analysis ---
-# You will need Entrez Gene IDs and a universe of all tested genes.
-# This part requires mapping your gene IDs to Entrez IDs and using GOstats.
-
-# Get the significant gene IDs
-significant_gene_ids <- rownames(sig_genes)
-
-# Get the universe of all tested gene IDs
-all_gene_ids <- rownames(count_data)
-
-# Set up parameters for GOstats hyperGTest
-# This assumes you have Entrez IDs. You might need to map your TriTrypDB IDs first.
-params <- new("GOHyperGParams",
-              geneIds = significant_gene_ids,
-              universeGeneIds = all_gene_ids,
-              annotation = "org.Tc.eg.db", # Example annotation package
-              ontology = "BP", # Biological Process, can also be "MF" or "CC"
-              pvalueCutoff = 0.05,
-              conditional = FALSE,
-              testDirection = "over")
-
-# Run the test
-go_results <- hyperGTest(params)
-summary(go_results)
+res2 <- results(dds, name="strain_Y_vs_G", tidy = T)
+res2$row[max(res2$log2FoldChange, na.rm = T)] # q4
 ```
 

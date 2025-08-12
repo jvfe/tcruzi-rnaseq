@@ -1,8 +1,8 @@
-paper_title: Drug-tolerant persister RNA-seq reveals transcriptional shift
-doi: 10.1101/2024.06.15.123456
-data_source: "SRA: SRP456789"
+paper_title: P21 Ablation Unveils Strain-Specific Transcriptional Reprogramming in Trypanosoma cruzi Amastigotes
+doi: 10.1155/ijm/9919200
+data_source: "SRA: SRP530203"
 domain: rna_seq
-ref_genome: H37Rv (ASM19595v2)
-tools: [fastp 0.23.4, bwa 0.7.17, samtools 1.20, featureCounts 2.0.4, DESeq2 1.40.2]
+ref_genome: TriTrypDB-64
+tools: [fastp 0.23.4, hisat2 1.20, featureCounts 2.0.4, DESeq2 1.40.2]
 estimated_runtime_minutes: 45
 estimated_time_for_human: 50
